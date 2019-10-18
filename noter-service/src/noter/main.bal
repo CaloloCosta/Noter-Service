@@ -4,7 +4,7 @@ import ballerina/lang.'int;
 import ballerina/log;
 
 int myPort = 9092; // change for every instance
-string[] instance_ports = ["9090", "9091", "9092, "9093", "9094"];
+string[] instance_ports = ["9090", "9091", "9092", "9093", "9094"];
 
 map<json> ledger = {"data": "", "hash": "", "previous-hash": "", "height": 0};
 // maybe use database in future
