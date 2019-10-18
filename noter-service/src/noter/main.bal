@@ -79,7 +79,6 @@ service noterService on new http:Listener(myPort) {
         path: "/updateNotice",
         methods: ["POST"]
     }
-    // not tested
     resource function updateNotice(http:Caller caller, http:Request request) returns error? {
         http:Response res = new;
         json rawJSON = check request.getJsonPayload();
@@ -120,30 +119,28 @@ service noterService on new http:Listener(myPort) {
                 m["month"] = month;
                 notices[id] = checkpanic json.constructFrom(m);  
             }
+            res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
+        }else {
+            res.setJsonPayload("id not found", contentType = "application/json");
         }
 
-        res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
         check caller->respond(res);
     }
 
     @http:ResourceConfig {
-        path: "/deleteNotice",
-        methods: ["POST"]
+        path: "/deleteNotice/{id}",
+        methods: ["GET"]
     }
-    // not tested
-    resource function deleteNotice(http:Caller caller, http:Request request) returns error? {
+    resource function deleteNotice(http:Caller caller, http:Request request, string id) returns error? {
         http:Response res = new;
         json rawJSON = check request.getJsonPayload();
-        map<json> renderedJson = check map<json>.constructFrom(rawJSON);
-        // get the fields
-        string id = renderedJson["id"].toString();
-        
+        map<json> renderedJson = check map<json>.constructFrom(rawJSON);        
         // make sure id exists
         if(notices.hasKey(id)){
             var e = notices.remove(id);
             res.setJsonPayload(<@untainted>"delete successful", contentType = "application/json");
         }else{
-            res.setJsonPayload(<@untainted>"key not found", contentType = "application/json");
+            res.setJsonPayload(<@untainted>"id not found", contentType = "application/json");
         }
         check caller->respond(res);
     }
