@@ -3,8 +3,7 @@ import ballerina/http;
 import ballerina/lang.'int;
 import ballerina/log;
 
-int myPort = 9091; // change for every instance
-// something more elegant may be needed here
+int myPort = 9092; // change for every instance
 string[] instance_ports = ["9090", "9091", "9092"];//, "9093", "9094"];
 
 map<json> ledger = {"data": "", "hash": "", "previous-hash": "", "height": 0};
@@ -68,10 +67,33 @@ service noterService on new http:Listener(myPort) {
         path: "/getNotice/{id}",
         methods: ["GET"]
     }
-    // TODO: get from other instances if notice not found here
     resource function getNotice(http:Caller caller, http:Request request, string id) returns error?{
         http:Response res = new;
-        res.setJsonPayload(<@untainted>notices[id], contentType = "application/json");
+        if(notices.hasKey(id)){
+            res.setJsonPayload(<@untainted>notices[id], contentType = "application/json");
+        }else{
+            // request from other instances
+            json result = requestNotice(id);
+            if(result == ""){
+                res.setJsonPayload(<@untainted>"notice not found", contentType = "application/json");
+            }else{
+                res.setJsonPayload(<@untainted>result, contentType = "application/json");
+            }
+        }
+        check caller->respond(res);
+    }
+
+     @http:ResourceConfig {
+        path: "/internalFindNotice/{id}",
+        methods: ["GET"]
+    }
+    resource function internalFindNotice(http:Caller caller, http:Request request, string id) returns error?{
+        http:Response res = new;
+        if(notices.hasKey(id)){
+            res.setJsonPayload(<@untainted>notices[id], contentType = "application/json");
+        }else{
+            res.setJsonPayload(<@untainted>"", contentType = "application/json");
+        }
         check caller->respond(res);
     }
 
@@ -183,8 +205,42 @@ function getSha512(string data) returns string {
 function gossip() {
     foreach string p in instance_ports {
         if(p != myPort.toString()){
-            http:Client clientEP = new ("http://localhost:" + p + "/");
+            http:Client clientEP = new ("http://localhost:" + p);
             var response = clientEP->post("/validate", <@untainted>ledger);
         }
     }
+}
+
+function requestNotice(string id) returns json{
+    foreach string p in instance_ports {
+        if(p != myPort.toString()){
+            http:Client clientEP = new ("http://localhost:" + p);
+            var response = clientEP->get("/internalFindNotice/"+id);
+            if(response is http:Response){
+                var x = response.getJsonPayload();
+                if(x is json && x != "notice not found"){
+                    return <@untainted>x;
+                }
+            }
+        }
+    }
+    return "";
+}
+
+function requestAllNotices() returns json{
+    json[] m = [];
+    
+    foreach string p in instance_ports {
+        if(p != myPort.toString()){
+            http:Client clientEP = new ("http://localhost:" + p);
+            var response = clientEP->get("/getNotices");
+            if(response is http:Response){
+                var x = response.getJsonPayload();
+                if(x is json){
+                    m[m.length()] = x;
+                }
+            }
+        }
+    }
+    return <@untainted>m;
 }
