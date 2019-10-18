@@ -21,8 +21,6 @@ service noterService on new http:Listener(myPort) {
         path: "/addNotice",
         methods: ["POST"]
     }
-
-    // not tested
     resource function addNotice(http:Caller caller, http:Request request) returns error? {
         http:Response res = new;
         json rawJSON = check request.getJsonPayload();
@@ -60,7 +58,6 @@ service noterService on new http:Listener(myPort) {
         path: "/getNotices",
         methods: ["POST"]
     }
-    // not tested
     resource function getNotices(http:Caller caller, http:Request request) returns error?{
         http:Response res = new;
         res.setJsonPayload(<@untainted>notices, contentType = "application/json");
@@ -71,7 +68,7 @@ service noterService on new http:Listener(myPort) {
         path: "/getNotice/{id}",
         methods: ["GET"]
     }
-    // not tested
+    // TODO: get from other instances if notice not found here
     resource function getNotice(http:Caller caller, http:Request request, string id) returns error?{
         http:Response res = new;
         res.setJsonPayload(<@untainted>notices[id], contentType = "application/json");
@@ -156,7 +153,6 @@ service noterService on new http:Listener(myPort) {
         path: "/validate"
     }
 
-    // not tested
     resource function validate(http:Caller caller, http:Request req) returns error? {
         json jsonValue = checkpanic req.getJsonPayload();
         map<json> renderedJson = check map<json>.constructFrom(jsonValue);
@@ -187,7 +183,6 @@ function getSha512(string data) returns string {
     return output.toString();
 }
 
-// not tested
 function gossip() {
     foreach string p in instance_ports {
         if(p != myPort.toString()){
