@@ -56,7 +56,7 @@ service noterService on new http:Listener(myPort) {
 
     @http:ResourceConfig {
         path: "/getNotices",
-        methods: ["POST"]
+        methods: ["GET"]
     }
     resource function getNotices(http:Caller caller, http:Request request) returns error?{
         http:Response res = new;
