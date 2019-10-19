@@ -1,0 +1,32 @@
+[2019-10-18 16:15:20,816] SEVERE {b7a.log.crash} - illegal function invocation 
+java.lang.IllegalStateException: illegal function invocation
+	at org.ballerinalang.net.http.HttpUtil.methodInvocationCheck(HttpUtil.java:1030)
+	at org.ballerinalang.net.http.HttpUtil.checkFunctionValidity(HttpUtil.java:1025)
+	at org.ballerinalang.net.http.nativeimpl.connection.Respond.nativeRespond(Respond.java:82)
+	at ballerina.http.http_connection.nativeRespond(http_connection.bal:167)
+	at ballerina.http.$value$Caller.respond(http_connection.bal:54)
+	at ballerina.http.$value$Caller.call(http_connection.bal)
+	at $value$noterService__service_0.getNotice(main.bal:104)
+	at $value$noterService__service_0.call(main.bal)
+	at org.ballerinalang.jvm.values.connector.Executor.lambda$submit$0(Executor.java:71)
+	at org.ballerinalang.jvm.scheduling.SchedulerItem.execute(Scheduler.java:486)
+	at org.ballerinalang.jvm.scheduling.Scheduler.run(Scheduler.java:237)
+	at org.ballerinalang.jvm.scheduling.Scheduler.runSafely(Scheduler.java:207)
+	at java.lang.Thread.run(Thread.java:748)
+ 
+[2019-10-18 16:15:20,943] SEVERE {b7a.log.crash} - illegal function invocation 
+java.lang.IllegalStateException: illegal function invocation
+	at org.ballerinalang.net.http.HttpUtil.methodInvocationCheck(HttpUtil.java:1030)
+	at org.ballerinalang.net.http.HttpUtil.checkFunctionValidity(HttpUtil.java:1025)
+	at org.ballerinalang.net.http.nativeimpl.connection.Respond.nativeRespond(Respond.java:82)
+	at ballerina.http.http_connection.nativeRespond(http_connection.bal:167)
+	at ballerina.http.$value$Caller.respond(http_connection.bal:54)
+	at ballerina.http.$value$Caller.call(http_connection.bal)
+	at $value$noterService__service_0.getNotice(main.bal:104)
+	at $value$noterService__service_0.call(main.bal)
+	at org.ballerinalang.jvm.values.connector.Executor.lambda$submit$0(Executor.java:71)
+	at org.ballerinalang.jvm.scheduling.SchedulerItem.execute(Scheduler.java:486)
+	at org.ballerinalang.jvm.scheduling.Scheduler.run(Scheduler.java:237)
+	at org.ballerinalang.jvm.scheduling.Scheduler.runSafely(Scheduler.java:207)
+	at java.lang.Thread.run(Thread.java:748)
+ 
