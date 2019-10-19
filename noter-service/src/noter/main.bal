@@ -100,6 +100,16 @@ json[] notices5 = [
     "submissionDate": "13/10/2019"
     }
 ];
+
+function lastIndex(json[] storage) returns int{
+    string lastIndex = storage[storage.length() - 1].id.toString();
+    int|error lIndex = ints:fromString(lastIndex);
+    if( lIndex is int){
+        return lIndex;
+    }
+    return 0;
+}
+
 listener http:Listener port1 = new(9091);
 listener http:Listener port2 = new(9092);
 listener http:Listener port3 = new(9093);
@@ -112,6 +122,77 @@ int ledgerCount = 0;
 }
 
 service noterService on port1, port2, port3, port4, port5{
+
+        @http:ResourceConfig {
+        path: "/gossip",
+        methods: ["POST"]
+    }
+    // not tested
+    resource function gossip(http:Caller caller, http:Request request) returns error? {
+        http:Response res = new;
+        json rawJSON = check request.getJsonPayload();
+        io:println("From gossip: ",rawJSON);
+        int port = caller.localAddress.port;
+        if(port == 9091){
+            io:println("i1");
+            json index = {"id": lastIndex(notices1)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            if(notice is json){
+                notices1.push(notice);  
+                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                check caller->respond(res);            
+            }
+                   
+        }
+        else if(port == 9092){
+            io:println("i2");
+            json index = {"id": lastIndex(notices2)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            
+            if(notice is json){
+                notices2.push(notice);
+                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                check caller->respond(res); 
+                
+            }
+                   
+        }
+        else if(port == 9093){
+            io:println("i3");
+            json index = {"id": lastIndex(notices3)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            
+            if(notice is json){
+                notices3.push(notice);
+                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                check caller->respond(res); 
+            }
+                   
+        }
+        else if(port == 9094){
+            io:println("i4");
+            json index = {"id": lastIndex(notices4)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            
+            if(notice is json){
+                notices4.push(notice);
+                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                check caller->respond(res); 
+            }        
+        }
+        else if(port == 9095){
+            io:println("i5");
+            json index = {"id": lastIndex(notices5)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            if(notice is json){
+                notices5.push(notice);  
+                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                check caller->respond(res); 
+            }
+                   
+        } 
+    }
+
     @http:ResourceConfig {
         path: "/addNotice",
         methods: ["POST"]
@@ -134,94 +215,163 @@ service noterService on port1, port2, port3, port4, port5{
 
         // add notice to storage, adding to ledger, gossip
         // json notice = {"id": id, "topic": topic, "description": description, "day": day, "weekNumber": weekNumber, "month": month};
-        string lastIndex = notices1[notices1.length() - 1].id.toString();
-        int|error lIndex = ints:fromString(lastIndex);
+           
+        
 
-        if(lIndex is int){
-            json index = {"id": lIndex+1};
+            // json index = {"id": lIndex+1};
+            // json|error notice = rawJSON.mergeJson(index);
+
+            
+        int port = caller.localAddress.port;
+        if(port == 9091){
+            json index = {"id": lastIndex(notices1)+1};
             json|error notice = rawJSON.mergeJson(index);
-
             if(notice is json){
-                int port = caller.localAddress.port;
-                if(port == 9091){
-                    json ledger1 = ledgerHandle(notice);
-                    boolean valid = validate(ledger1);
-                    if(valid){
-                        notices1.push(notice);
-                        if(ledger1.ledgerCount == 5){
-                            ledgerCount = 0;
-                            ledger = <@untainted>ledger1;
-                            res.setJsonPayload(<@untainted>notice, contentType = "application/json");
-                            check caller->respond(res);  
-                        }
-                        else{
-                            gossip(instance_ports[1],notice);
-                        }
-                        
-                    }
+                json ledger1 = ledgerHandle(notice);
+                boolean valid = validate(ledger1);
+                if(valid){
+                    notices1.push(notice);
+                    http:Client clientEP;
+                    http:Response|error response;
+                    
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+                    
+                    ledger = <@untainted>ledger1;
+                    io:println("Done!");
+                    res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                    check caller->respond(res);  
+ 
                 }
-                else if (port == 9092){
-                    json ledger2 = ledgerHandle(notice);
-                    boolean valid = validate(ledger2);
-                    if(valid){
-                        notices2.push(notice);
-                        if(ledger2.ledgerCount == 5){
-                            ledgerCount = 0;
-                            res.setJsonPayload(<@untainted>notice, contentType = "application/json");
-                            check caller->respond(res);  
-                        }
-                        else{
-                            gossip(instance_ports[2],notice);
-                        }  
-                    }
-                }
-                else if (port == 9093){
-                    json ledger3 = ledgerHandle(notice);
-                    boolean valid = validate(ledger3);
-                    if(valid){
-                        notices3.push(notice);
-                        if(ledger3.ledgerCount == 5){
-                            ledgerCount = 0;
-                            res.setJsonPayload(<@untainted>notice, contentType = "application/json");
-                            check caller->respond(res);  
-                        }
-                        else{
-                            gossip(instance_ports[3],notice);
-                        }  
-                    }                   
-                }
-                else if (port == 9094){
-                    json ledger4 = ledgerHandle(notice);
-                    boolean valid = validate(ledger4);
-                    if(valid){
-                        notices4.push(notice);
-                        if(ledger4.ledgerCount == 5){
-                            ledgerCount = 0;
-                            res.setJsonPayload(<@untainted>notice, contentType = "application/json");
-                            check caller->respond(res);  
-                        }
-                        else{
-                            gossip(instance_ports[4],notice);
-                        }  
-                    }
-                }
-                else if (port == 9095){
-                    json ledger5 = ledgerHandle(notice);
-                    boolean valid = validate(ledger5);
-                    if(valid){
-                        notices5.push(notice);
-                        if(ledger5.ledgerCount == 5){
-                            ledgerCount = 0;
-                            res.setJsonPayload(<@untainted>notice, contentType = "application/json");
-                            check caller->respond(res);  
-                        }
-                        else{
-                            gossip(instance_ports[0],notice);
-                        }  
-                    }
+            }
+                   
+        }
+        else if (port == 9092){
+            json index = {"id": lastIndex(notices2)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            if(notice is json){
+                json ledger2 = ledgerHandle(notice);
+                boolean valid = validate(ledger2);
+                if(valid){
+                    notices2.push(notice);
+                    http:Client clientEP;
+                    http:Response|error response;
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+                    io:println("Done!");
+                    res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                    check caller->respond(res);  
                 }
             }
         }
+        else if (port == 9093){
+            json index = {"id": lastIndex(notices3)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            if(notice is json){
+                json ledger3 = ledgerHandle(notice);
+                boolean valid = validate(ledger3);
+                if(valid){
+                    notices3.push(notice);
+                    http:Client clientEP;
+                    http:Response|error response;
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+                    
+                    io:println("Done!");
+                    res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                    check caller->respond(res);  
+                }
+                    
+            }                  
+        }
+        else if (port == 9094){
+            json index = {"id": lastIndex(notices4)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            if(notice is json){
+                json ledger4 = ledgerHandle(notice);
+                boolean valid = validate(ledger4);
+                if(valid){
+                    notices4.push(notice);
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+                io:println("Done!");
+                    res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                    check caller->respond(res);  
+                    
+                      
+                }
+            }
+        }
+        else if (port == 9095){
+            json index = {"id": lastIndex(notices5)+1};
+            json|error notice = rawJSON.mergeJson(index);
+            if(notice is json){
+                json ledger5 = ledgerHandle(notice);
+                boolean valid = validate(ledger5);
+                if(valid){
+                    notices5.push(notice);
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post("/gossip", <@untainted>notice);
+                    io:println("Done!");
+                    res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                    check caller->respond(res);  
+ 
+                }
+            }
+        }
+            
+        
               
 
         // string noticeHash = getSha512(rawJSON.toJsonString());
@@ -447,13 +597,15 @@ function ledgerHandle(json notice) returns json{
 
 function validate(json currentLedger) returns boolean{
     if(currentLedger.previousHash == ledger.hash){
+        io:println("Confirm ledger!");
         return true;
     }
+    io:println("does not Confirm ledger!");
     return false;
 }
 
 // not tested
-function gossip(string port, json notice) {
-    http:Client clientEP = new ("http://localhost:" + port + "/");
-    var response = clientEP->post("/addNotice", <@untainted>notice);
-}
+// function gossip(string port, json notice) {
+//     http:Client clientEP = new ("http://localhost:" + port);
+//     var response = clientEP->post("/addNotice", <@untainted>notice);
+// }
