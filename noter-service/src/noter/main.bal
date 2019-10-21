@@ -135,61 +135,97 @@ service noterService on port1, port2, port3, port4, port5{
         int port = caller.localAddress.port;
         if(port == 9091){
             io:println("i1");
-            json index = {"id": lastIndex(notices1)+1};
-            json|error notice = rawJSON.mergeJson(index);
-            if(notice is json){
+            json notice = {
+                "id": lastIndex(notices1)+1, 
+                "topic": rawJSON.topic.toString(), 
+                "description": rawJSON.description.toString(), 
+                "day": rawJSON.day.toString(), 
+                "week": rawJSON.week.toString(), 
+                "month": rawJSON.month.toString(),
+                "submissionDate": rawJSON.submissionDate.toString()
+            };
+ 
                 notices1.push(notice);  
-                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                res.setPayload("All goog!");
+                //res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                 check caller->respond(res);            
-            }
+           
                    
         }
         else if(port == 9092){
             io:println("i2");
-            json index = {"id": lastIndex(notices2)+1};
-            json|error notice = rawJSON.mergeJson(index);
+            json notice = {
+                "id": lastIndex(notices1)+1, 
+                "topic": rawJSON.topic.toString(), 
+                "description": rawJSON.description.toString(), 
+                "day": rawJSON.day.toString(), 
+                "week": rawJSON.week.toString(), 
+                "month": rawJSON.month.toString(),
+                "submissionDate": rawJSON.submissionDate.toString()
+            };
             
-            if(notice is json){
+          
                 notices2.push(notice);
-                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                res.setPayload("All goog!");
+                //res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                 check caller->respond(res); 
-                
-            }
+     
                    
         }
         else if(port == 9093){
             io:println("i3");
-            json index = {"id": lastIndex(notices3)+1};
-            json|error notice = rawJSON.mergeJson(index);
-            
-            if(notice is json){
+            json notice = {
+                "id": lastIndex(notices1)+1, 
+                "topic": rawJSON.topic.toString(), 
+                "description": rawJSON.description.toString(), 
+                "day": rawJSON.day.toString(), 
+                "week": rawJSON.week.toString(), 
+                "month": rawJSON.month.toString(),
+                "submissionDate": rawJSON.submissionDate.toString()
+            };
+     
                 notices3.push(notice);
-                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                res.setPayload("All goog!");
+                //res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                 check caller->respond(res); 
-            }
-                   
+      
         }
         else if(port == 9094){
             io:println("i4");
-            json index = {"id": lastIndex(notices4)+1};
-            json|error notice = rawJSON.mergeJson(index);
-            
-            if(notice is json){
+            json notice = {
+                "id": lastIndex(notices1)+1, 
+                "topic": rawJSON.topic.toString(), 
+                "description": rawJSON.description.toString(), 
+                "day": rawJSON.day.toString(), 
+                "week": rawJSON.week.toString(), 
+                "month": rawJSON.month.toString(),
+                "submissionDate": rawJSON.submissionDate.toString()
+            };
+          
                 notices4.push(notice);
-                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                res.setPayload("All goog!");
+                //res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                 check caller->respond(res); 
-            }        
+   
         }
         else if(port == 9095){
             io:println("i5");
-            json index = {"id": lastIndex(notices5)+1};
-            json|error notice = rawJSON.mergeJson(index);
-            if(notice is json){
+           json notice = {
+                "id": lastIndex(notices1)+1, 
+                "topic": rawJSON.topic.toString(), 
+                "description": rawJSON.description.toString(), 
+                "day": rawJSON.day.toString(), 
+                "week": rawJSON.week.toString(), 
+                "month": rawJSON.month.toString(),
+                "submissionDate": rawJSON.submissionDate.toString()
+            };
+            
                 notices5.push(notice);  
-                res.setJsonPayload(<@untainted>notice, contentType = "application/json");
+                res.setPayload("All goog!");
+                //res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                 check caller->respond(res); 
-            }
-                   
+            
+        
         } 
     }
 
@@ -204,27 +240,9 @@ service noterService on port1, port2, port3, port4, port5{
         http:Response res = new;
         json rawJSON = check request.getJsonPayload();
         io:print(rawJSON);
-        // map<json> renderedJson = check map<json>.constructFrom(rawJSON);
-        // get the fields
-        // string id = renderedJson["id"].toString();
-        // string topic = renderedJson["topic"].toString();
-        // string description = renderedJson["description"].toString();
-        // int day = check 'int:fromString(renderedJson["day"].toString());
-        // int weekNumber = check 'int:fromString(renderedJson["weekNumber"].toString());
-        // int month = check 'int:fromString(renderedJson["month"].toString());
-
-        // add notice to storage, adding to ledger, gossip
-        // json notice = {"id": id, "topic": topic, "description": description, "day": day, "weekNumber": weekNumber, "month": month};
-           
-        
-
-            // json index = {"id": lIndex+1};
-            // json|error notice = rawJSON.mergeJson(index);
-
-            
         int port = caller.localAddress.port;
         if(port == 9091){
-            json index = {"id": lastIndex(notices1)+1};
+            json index = {"id": lastIndex(<@untainted>notices1)+1};
             json|error notice = rawJSON.mergeJson(index);
             if(notice is json){
                 json ledger1 = ledgerHandle(notice);
@@ -235,16 +253,16 @@ service noterService on port1, port2, port3, port4, port5{
                     http:Response|error response;
                     
                     clientEP = new ("http://localhost:9092");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9093");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9094");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9095");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
                     
                     ledger = <@untainted>ledger1;
                     io:println("Done!");
@@ -256,7 +274,7 @@ service noterService on port1, port2, port3, port4, port5{
                    
         }
         else if (port == 9092){
-            json index = {"id": lastIndex(notices2)+1};
+            json index = {"id": lastIndex(<@untainted>notices2)+1};
             json|error notice = rawJSON.mergeJson(index);
             if(notice is json){
                 json ledger2 = ledgerHandle(notice);
@@ -266,16 +284,18 @@ service noterService on port1, port2, port3, port4, port5{
                     http:Client clientEP;
                     http:Response|error response;
                     clientEP = new ("http://localhost:9091");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9093");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9094");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9095");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
+
+                    ledger = <@untainted>ledger2;
                     io:println("Done!");
                     res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                     check caller->respond(res);  
@@ -283,7 +303,7 @@ service noterService on port1, port2, port3, port4, port5{
             }
         }
         else if (port == 9093){
-            json index = {"id": lastIndex(notices3)+1};
+            json index = {"id": lastIndex(<@untainted>notices3)+1};
             json|error notice = rawJSON.mergeJson(index);
             if(notice is json){
                 json ledger3 = ledgerHandle(notice);
@@ -293,17 +313,18 @@ service noterService on port1, port2, port3, port4, port5{
                     http:Client clientEP;
                     http:Response|error response;
                     clientEP = new ("http://localhost:9092");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9091");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9094");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9095");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
                     
+                    ledger = <@untainted>ledger3;
                     io:println("Done!");
                     res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                     check caller->respond(res);  
@@ -312,7 +333,7 @@ service noterService on port1, port2, port3, port4, port5{
             }                  
         }
         else if (port == 9094){
-            json index = {"id": lastIndex(notices4)+1};
+            json index = {"id": lastIndex(<@untainted>notices4)+1};
             json|error notice = rawJSON.mergeJson(index);
             if(notice is json){
                 json ledger4 = ledgerHandle(notice);
@@ -323,16 +344,18 @@ service noterService on port1, port2, port3, port4, port5{
                     http:Client clientEP;
                     http:Response|error response;
                     clientEP = new ("http://localhost:9092");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9093");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9091");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9095");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
+
+                    ledger = <@untainted>ledger4;
                 io:println("Done!");
                     res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                     check caller->respond(res);  
@@ -342,7 +365,7 @@ service noterService on port1, port2, port3, port4, port5{
             }
         }
         else if (port == 9095){
-            json index = {"id": lastIndex(notices5)+1};
+            json index = {"id": lastIndex(<@untainted>notices5)+1};
             json|error notice = rawJSON.mergeJson(index);
             if(notice is json){
                 json ledger5 = ledgerHandle(notice);
@@ -352,17 +375,20 @@ service noterService on port1, port2, port3, port4, port5{
 
                     http:Client clientEP;
                     http:Response|error response;
+
                     clientEP = new ("http://localhost:9092");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9093");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9094");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
 
                     clientEP = new ("http://localhost:9091");
-                    response = clientEP->post("/gossip", <@untainted>notice);
+                    response = clientEP->post("/gossip", <@untainted>rawJSON);
+
+                    ledger = <@untainted>ledger5;
                     io:println("Done!");
                     res.setJsonPayload(<@untainted>notice, contentType = "application/json");
                     check caller->respond(res);  
@@ -374,21 +400,6 @@ service noterService on port1, port2, port3, port4, port5{
         
               
 
-        // string noticeHash = getSha512(rawJSON.toJsonString());
-        // ledger["data"] = rawJSON;
-        // // current becomes previous hash
-        // if(ledger["height"] != 0){
-        //     ledger["previous-hash"] = ledger["hash"];
-        // }
-        // ledger["hash"] = noticeHash;
-        // count = count + 1;
-        // ledger["height"] = count;
-        // // no need to touch 'previous-hash'
-        // // gossip to other instances
-        // gossip();
-        // // return the data received as is
-        // res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
-        // check caller->respond(res);
     }
 
     @http:ResourceConfig {
@@ -475,109 +486,458 @@ service noterService on port1, port2, port3, port4, port5{
         
     }
 
-    // @http:ResourceConfig {
-    //     path: "/updateNotice",
-    //     methods: ["POST"]
-    // }
-    // // not tested
-    // resource function updateNotice(http:Caller caller, http:Request request) returns error? {
-    //     http:Response res = new;
-    //     json rawJSON = check request.getJsonPayload();
-    //     map<json> renderedJson = check map<json>.constructFrom(rawJSON);
-    //     // get the fields
-    //     string id = renderedJson["id"].toString();
-    //     string topic = renderedJson["topic"].toString();
-    //     string description = renderedJson["description"].toString();
-    //     var day = 'int:fromString(renderedJson["day"].toString());
-    //     var weekNumber = 'int:fromString(renderedJson["weekNumber"].toString());
-    //     var month = 'int:fromString(renderedJson["month"].toString());
-    //     // make sure id exists
-    //     if(notices.hasKey(id)){
-    //         // carry out update to fields which are not empty
-    //         if(topic != ""){
-    //             map<json> m = <map<json>> notices[id];
-    //             m["topic"] = topic;
-    //             notices[id] = checkpanic json.constructFrom(m);                
-    //         }
-    //         if(description != ""){
-    //             map<json> m = <map<json>> notices[id];
-    //             m["description"] = description;
-    //             notices[id] = checkpanic json.constructFrom(m);  
-    //         }
-    //         if(day is int){
-    //             map<json> m = <map<json>> notices[id];
-    //             m["day"] = day;
-    //             notices[id] = checkpanic json.constructFrom(m);
-    //         }
-    //         if(weekNumber is int){
-    //             map<json> m = <map<json>> notices[id];
-    //             m["weekNumber"] = weekNumber;
-    //             notices[id] = checkpanic json.constructFrom(m);
-    //         }
-    //         if(month is int){
-    //             map<json> m = <map<json>> notices[id];
-    //             m["month"] = month;
-    //             notices[id] = checkpanic json.constructFrom(m);  
-    //         }
-    //     }
+    @http:ResourceConfig {
+        path: "/deleteNotice/{id}",
+        methods: ["GET"]
+    }
+    resource function deleteNotice(http:Caller caller, http:Request request, int id) returns error?{
+        http:Response res = new;
+        json err = {"error": "Notice not found"};
+        int port = caller.localAddress.port;
+        if(port == 9091){
+            int count = 0; 
+            while (count < notices1.length()) {
+                if(notices1[count].id == id){
+                    json|error notice =   notices1.remove(count);
 
-    //     res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
-    //     check caller->respond(res);
-    // }
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipDelete"+id.toString();
+                    
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->get(<@untaitend>endpoint);
 
-    // @http:ResourceConfig {
-    //     path: "/deleteNotice",
-    //     methods: ["POST"]
-    // }
-    // // not tested
-    // resource function deleteNotice(http:Caller caller, http:Request request) returns error? {
-    //     http:Response res = new;
-    //     json rawJSON = check request.getJsonPayload();
-    //     // map<json> renderedJson = check map<json>.constructFrom(rawJSON);
-    //     // get the fields
-    //     //string id = renderedJson["id"].toString();
- 
-    //     // make sure id exists
-    //     if(notices.hasKey(id)){
-    //         var e = notices.remove(id);
-    //         res.setJsonPayload(<@untainted>"delete successful", contentType = "application/json");
-    //     }else{
-    //         res.setJsonPayload(<@untainted>"key not found", contentType = "application/json");
-    //     }
-    //     check caller->respond(res);
-    // }
+                    if(notice is json){
+                        res.setJsonPayload(<@untainted>notice , contentType = "application/json");
+                        check caller->respond(res);
+                    }
+                }
+                count = count + 1;
+            }
+        }
+        else if (port == 9092){
+            int count = 0; 
+            while (count < notices2.length()) {
+                if(notices2[0].id == id){
+                    json|error notice = notices2.remove(count);
 
-    // @http:ResourceConfig {
-    //     methods: ["POST"],
-    //     path: "/validate"
-    // }
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipDelete"+id.toString();
+                    
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->get(<@untaitend>endpoint);
 
-    // // not tested
-    // resource function validate(http:Caller caller, http:Request req) returns error? {
-    //     json jsonValue = checkpanic req.getJsonPayload();
-    //     map<json> renderedJson = check map<json>.constructFrom(jsonValue);
-    //     // The validation entails checking the hash of the previous ledger and the signature of
-    //     // the current one
-    //     // check if is genesis to us
-    //     if(ledger["height"] == 0){
-    //         // since we have nothing to compare with, just accept
-    //         ledger["data"] = renderedJson["data"];
-    //         ledger["hash"] = renderedJson["hash"];
-    //         ledger["height"] = check 'int:fromString(ledger["height"].toString()) + 1;
-    //         log:printInfo("ledger accepted as genesis");
-    //     }else if(renderedJson["previous-hash"] == ledger["hash"]){
-    //         ledger["previous-hash"] = ledger["hash"];
-    //         ledger["data"] = renderedJson["data"];
-    //         ledger["hash"] = renderedJson["hash"];
-    //         ledger["height"] = check 'int:fromString(ledger["height"].toString()) + 1;
-    //         log:printInfo("ledger accepted");
-    //     }else{
-    //         log:printInfo("ledger not accepted");
-    //     }
-    //     var x = caller -> ok();
-    // }
+                    if(notice is json){
+                        res.setJsonPayload(<@untainted>notice , contentType = "application/json");
+                        check caller->respond(res);
+                    }
+                }
+                count = count + 1;
+            }
+
+        }
+        else if (port == 9093){
+            int count = 0; 
+            while (count < notices3.length()) {
+                if(notices3[0].id == id){
+                    json|error notice = notices3.remove(count);
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipDelete"+id.toString();
+                    
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    
+                    if(notice is json){
+                        res.setJsonPayload(<@untainted>notice , contentType = "application/json");
+                        check caller->respond(res);
+                    }
+                }
+                count = count + 1;
+            }
+
+        }
+        else if (port == 9094){
+            int count = 0; 
+            while (count < notices4.length()) {
+                if(notices4[0].id == id){
+                    json|error notice = notices4.remove(count);
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipDelete"+id.toString();
+                    
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    
+                    if(notice is json){
+                        res.setJsonPayload(<@untainted>notice , contentType = "application/json");
+                        check caller->respond(res);
+                    }
+                }
+                count = count + 1;
+            }
+
+        }
+        else if (port == 9095){
+            int count = 0; 
+            while (count < notices5.length()) {
+                if(notices5[0].id == id){
+                    json|error notice = notices5.remove(count);
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipDelete"+id.toString();
+                    
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->get(<@untaitend>endpoint);
+                    
+                    if(notice is json){
+                        res.setJsonPayload(<@untainted>notice , contentType = "application/json");
+                        check caller->respond(res);
+                    }
+                }
+                count = count + 1;
+            }
+
+        }
+
+        res.setJsonPayload(<@untainted>err, contentType = "application/json");
+        check caller->respond(res);
+
+    }
+
+
+ @http:ResourceConfig {
+        path: "/gossipDelete/{id}",
+        methods: ["GET"]
+    }
+    // not tested
+    resource function gossipDelete(http:Caller caller, http:Request request, int id) returns error? {
+        http:Response res = new;
+        json err = {"error": "Notice not found"};
+        int port = caller.localAddress.port;
+        if(port == 9091){
+            int count = 0; 
+            while (count < notices1.length()) {
+                if(notices1[0].id == id){
+                    any|error notice = notices1.remove(count);
+                    res.setPayload(<@untainted> id);
+                    check caller->respond(res);
+                }
+                count = count + 1;
+            }
+        }
+        else if (port == 9092){
+            int count = 0; 
+            while (count < notices2.length()) {
+                if(notices2[0].id == id){
+                    any|error notice = notices2.remove(count);
+                    res.setPayload(<@untainted> id);
+                    check caller->respond(res);
+                }
+                count = count + 1;
+            }
+
+        }
+        else if (port == 9093){
+            int count = 0; 
+            while (count < notices3.length()) {
+                if(notices3[0].id == id){
+                    any|error notice = notices3.remove(count);
+                    res.setPayload(<@untainted> id);
+                    check caller->respond(res);
+                }
+                count = count + 1;
+            }
+
+        }
+        else if (port == 9094){
+            int count = 0; 
+            while (count < notices4.length()) {
+                if(notices4[0].id == id){
+                    any|error notice = notices4.remove(count);
+                    res.setPayload(<@untainted> id);
+                    check caller->respond(res);
+                }
+                count = count + 1;
+            }
+
+        }
+        else if (port == 9095){
+            int count = 0; 
+            while (count < notices5.length()) {
+                if(notices5[0].id == id){
+                    any|error notice = notices5.remove(count);
+                    res.setPayload(<@untainted> id);
+                    check caller->respond(res);
+                }
+                count = count + 1;
+            }
+
+        }
+        count = 0;
+    }
+
+    @http:ResourceConfig {
+        path: "/updateNotice",
+        methods: ["POST"]
+    }
+    // not tested
+    resource function updateNotice(http:Caller caller, http:Request request) returns error? {
+        http:Response res = new;
+        json rawJSON = check request.getJsonPayload();
+        io:print("UPadte: ",rawJSON);
+        int port = caller.localAddress.port;
+        if(port == 9091){
+            if(rawJSON.id != null){
+                int count = 0;
+                while(count < notices1.length()){
+                    if(notices1[count].id.toString() == rawJSON.id.toString()){
+                        notices2[count] = rawJSON;
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipUpdate/"+rawJSON.id.toString();
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+                    
+                    res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
+                    check caller->respond(res);
+                    }
+                }
+
+            }
+        }
+
+        else if(port == 9092){
+            if(rawJSON.id != null){
+                int count = 0;
+                while(count < notices2.length()){
+                    if(notices2[count].id.toString() == rawJSON.id.toString()){
+                        
+                        notices1[count] = rawJSON;
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipUpdate/"+rawJSON.id.toString();
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9093");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+                    
+                    res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
+                    check caller->respond(res);
+                    }
+                }
+
+            }
+        }
+
+        else if(port == 9093){
+            if(rawJSON.id != null){
+                int count = 0;
+                while(count < notices3.length()){
+                    if(notices3[count].id.toString() == rawJSON.id.toString()){
+                       
+                        notices3[count] = rawJSON;
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipUpdate/"+rawJSON.id.toString();
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+                    
+                    res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
+                    check caller->respond(res);
+                    }
+                }
+
+            }
+        }
+        else if(port == 9094){
+            if(rawJSON.id != null){
+                int count = 0;
+                while(count < notices4.length()){
+                    if(notices4[count].id.toString() == rawJSON.id.toString()){
+                        
+                        notices4[count] = rawJSON;
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipUpdate/"+rawJSON.id.toString();
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9095");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+                    
+                    res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
+                    check caller->respond(res);
+                    }
+                }
+
+            }
+        }
+        else if(port == 9095){
+            if(rawJSON.id != null){
+                int count = 0;
+                while(count < notices5.length()){
+                    if(notices5[count].id.toString() == rawJSON.id.toString()){
+                     
+                        notices5[count] = rawJSON;
+
+                    http:Client clientEP;
+                    http:Response|error response;
+                    string endpoint = "/gossipUpdate/"+rawJSON.id.toString();
+                    clientEP = new ("http://localhost:9092");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9094");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+
+                    clientEP = new ("http://localhost:9091");
+                    response = clientEP->post(<@untainted>endpoint, <@untainted>rawJSON);
+                    
+                    res.setJsonPayload(<@untainted>rawJSON, contentType = "application/json");
+                    check caller->respond(res);
+                    }
+                }
+
+            }
+        }
+    }
+
+
+        @http:ResourceConfig {
+        path: "/gossipUpdate/{id}",
+        methods: ["POST"]
+    }
+    // not tested
+    resource function gossipUpdate(http:Caller caller, http:Request request, int id) returns error? {
+        http:Response res = new;
+        json rawJSON = check request.getJsonPayload();
+        io:print(rawJSON);
+        int port = caller.localAddress.port;
+        if(port == 9091){ 
+            int count = 0;
+            while(count < notices1.length()){
+                if(notices1[count].id.toString() == rawJSON.id.toString()){
+                    notices1[count] = rawJSON;
+                    res.setJsonPayload(<@untainted>rawJSON,contentType = "application/json");
+                    check caller->respond(res);
+                }
+            }                   
+        }
+
+        else if(port == 9092){
+            int count = 0;
+            while(count < notices2.length()){
+                if(notices2[count].id.toString() == rawJSON.id.toString()){
+                    notices2[count] = rawJSON;
+                    res.setJsonPayload(<@untainted>rawJSON,contentType = "application/json");
+                    check caller->respond(res);
+                }
+            }     
+        }
+
+        else if(port == 9093){
+            int count = 0;
+            while(count < notices3.length()){
+                if(notices3[count].id.toString() == rawJSON.id.toString()){
+                    notices3[count] = rawJSON;
+                    res.setJsonPayload(<@untainted>rawJSON,contentType = "application/json");
+                    check caller->respond(res);
+                }
+            }     
+        }
+        else if(port == 9094){
+            int count = 0;
+            while(count < notices4.length()){
+                if(notices4[count].id.toString() == rawJSON.id.toString()){
+                    notices4[count] = rawJSON;
+                    res.setJsonPayload(<@untainted>rawJSON,contentType = "application/json");
+                    check caller->respond(res);
+                }
+            }     
+        }
+        else if(port == 9095){
+            int count = 0;
+            while(count < notices1.length()){
+                if(notices5[count].id.toString() == rawJSON.id.toString()){
+                    notices5[count] = rawJSON;
+                    res.setJsonPayload(<@untainted>rawJSON,contentType = "application/json");
+                    check caller->respond(res);
+                }
+            }     
+        }
+    }
 }
-
 function getSha512(string data) returns string {
     byte[] output = crypto:hashSha512(data.toBytes());
     return output.toString();
@@ -604,8 +964,4 @@ function validate(json currentLedger) returns boolean{
     return false;
 }
 
-// not tested
-// function gossip(string port, json notice) {
-//     http:Client clientEP = new ("http://localhost:" + port);
-//     var response = clientEP->post("/addNotice", <@untainted>notice);
-// }
+
