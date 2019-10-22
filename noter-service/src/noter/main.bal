@@ -2,6 +2,8 @@ import ballerina/crypto;
 import ballerina/http;
 import ballerina/lang.'int as ints;
 import ballerina/io;
+import ballerina/docker;
+// import ballerina/kubernetes;
 // import ballerina/log;
 
 int myPort = 9091; // change for every instance
@@ -109,16 +111,27 @@ function lastIndex(json[] storage) returns int{
     }
     return 0;
 }
-
-listener http:Listener port1 = new(9091);
-listener http:Listener port2 = new(9092);
-listener http:Listener port3 = new(9093);
-listener http:Listener port4 = new(9094);
-listener http:Listener port5 = new(9095);
 int count = 0;
 int ledgerCount = 0;
-@http:ServiceConfig {
-    basePath: "/"
+@docker:Expose {}
+listener http:Listener port1 = new(9091);
+
+@docker:Expose {}
+listener http:Listener port2 = new(9092);
+
+@docker:Expose {}
+listener http:Listener port3 = new(9093);
+
+@docker:Expose {}
+listener http:Listener port4 = new(9094);
+
+@docker:Expose {}
+listener http:Listener port5 = new(9095);
+
+
+
+@docker:Config {
+    name: "noter"
 }
 
 service noterService on port1, port2, port3, port4, port5{
