@@ -14,92 +14,92 @@ json ledger = {"data": "", "hash": "", "previous-hash": ""};
 // maybe use database in future
 json[] notices1 = [
     {"id": 1, 
-    "topic": "server", 
-    "description": "Ballerina server", 
+    "topic": "DSP Assignment 2", 
+    "description": "DSP Assignment 2 consist of a ballerina service with 5 instances and a client written in vanilla JS", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "23/10/2019"
     },
     {"id": 2, 
-    "topic": "secind test", 
-    "description": "Ballerina server test", 
+    "topic": "Ballerina day conference", 
+    "description": "Come and discuss with us if people around the world shoud either use ballerina or not.", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "22/10/2019"
     }
 ];
 json[] notices2 = [
-    {"id": 1, 
-    "topic": "server", 
-    "description": "Ballerina server", 
+       {"id": 1, 
+    "topic": "DSP Assignment 2", 
+    "description": "DSP Assignment 2 consist of a ballerina service with 5 instances and a client written in vanilla JS", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "23/10/2019"
     },
     {"id": 2, 
-    "topic": "secind test", 
-    "description": "Ballerina server test", 
+    "topic": "Ballerina day conference", 
+    "description": "Come and discuss with us if people around the world shoud either use ballerina or not.", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "22/10/2019"
     }
 ];
 json[] notices3 = [
-    {"id": 1, 
-    "topic": "server", 
-    "description": "Ballerina server", 
+       {"id": 1, 
+    "topic": "DSP Assignment 2", 
+    "description": "DSP Assignment 2 consist of a ballerina service with 5 instances and a client written in vanilla JS", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "23/10/2019"
     },
     {"id": 2, 
-    "topic": "secind test", 
-    "description": "Ballerina server test", 
+    "topic": "Ballerina day conference", 
+    "description": "Come and discuss with us if people around the world shoud either use ballerina or not.", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "22/10/2019"
     }
 ];
 json[] notices4 = [
-    {"id": 1, 
-    "topic": "server", 
-    "description": "Ballerina server", 
+        {"id": 1, 
+    "topic": "DSP Assignment 2", 
+    "description": "DSP Assignment 2 consist of a ballerina service with 5 instances and a client written in vanilla JS", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "23/10/2019"
     },
     {"id": 2, 
-    "topic": "secind test", 
-    "description": "Ballerina server test", 
+    "topic": "Ballerina day conference", 
+    "description": "Come and discuss with us if people around the world shoud either use ballerina or not.", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "22/10/2019"
     }
 ];
 json[] notices5 = [
-    {"id": 1, 
-    "topic": "server", 
-    "description": "Ballerina server", 
+        {"id": 1, 
+    "topic": "DSP Assignment 2", 
+    "description": "DSP Assignment 2 consist of a ballerina service with 5 instances and a client written in vanilla JS", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "23/10/2019"
     },
     {"id": 2, 
-    "topic": "secind test", 
-    "description": "Ballerina server test", 
+    "topic": "Ballerina day conference", 
+    "description": "Come and discuss with us if people around the world shoud either use ballerina or not.", 
     "day": 5, 
     "week": 2, 
     "month": 1,
-    "submissionDate": "13/10/2019"
+    "submissionDate": "22/10/2019"
     }
 ];
 
@@ -130,13 +130,14 @@ listener http:Listener port5 = new(9095);
 
 
 
-@docker:Config {
-    name: "noter"
+@docker:Config {}
+@http:ServiceConfig {
+    basePath: "/"
 }
 
 service noterService on port1, port2, port3, port4, port5{
 
-        @http:ResourceConfig {
+    @http:ResourceConfig {
         path: "/gossip",
         methods: ["POST"]
     }
@@ -408,10 +409,7 @@ service noterService on port1, port2, port3, port4, port5{
  
                 }
             }
-        }
-            
-        
-              
+        }      
 
     }
 
